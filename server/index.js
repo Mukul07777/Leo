@@ -216,6 +216,23 @@ app.post("/api/ai/reply", async (req, res) => {
   }
 });
 
+app.post("/api/ai/assistant", async (req, res) => {
+  const { text } = req.body;
+  try {
+    const prompt = `You are Leo, a concise on-device assistant embedded in a private chat app. Answer the user's request directly and briefly (2-3 sentences max), no preamble like "As an AI".\n\nUser: ${text}\nLeo:`;
+    const r = await fetch(`${OLLAMA_URL}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: OLLAMA_MODEL, prompt, stream: false }),
+      signal: AbortSignal.timeout(25000),
+    });
+    const data = await r.json();
+    res.json({ reply: (data.response || "").trim() });
+  } catch (err) {
+    res.status(503).json({ error: "AI unavailable", reply: "" });
+  }
+});
+
 app.post("/api/ai/summarize", async (req, res) => {
   const { history } = req.body;
   try {

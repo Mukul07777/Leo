@@ -78,6 +78,15 @@ export async function getAiReplies(history) {
   return res.json();
 }
 
+export async function getAiAssistantReply(text) {
+  const res = await fetch(`${API_BASE}/api/ai/assistant`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  return res.json();
+}
+
 export async function getAiSummary(history) {
   const res = await fetch(`${API_BASE}/api/ai/summarize`, {
     method: "POST",

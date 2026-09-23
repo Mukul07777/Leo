@@ -21,9 +21,11 @@ function formatDuration(sec) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-export default function ChatWindow({ currentUser, room, peerUser }) {
+export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }) {
   const [messages, setMessages] = useState([]);
   const [decrypted, setDecrypted] = useState({}); // messageId -> plaintext
+  const [localNotes, setLocalNotes] = useState([]); // @leo commands — never sent to server or the other person
+  const [leoThinking, setLeoThinking] = useState(false);
   const [text, setText] = useState("");
   const [typingUsers, setTypingUsers] = useState({});
   const [uploading, setUploading] = useState(false);
@@ -71,6 +73,7 @@ export default function ChatWindow({ currentUser, room, peerUser }) {
     setSearchOpen(false);
     setSummary(null);
     setAiSuggestions([]);
+    setLocalNotes([]);
 
     return () => {
       socket.emit("leave", room.id);
@@ -167,6 +170,21 @@ export default function ChatWindow({ currentUser, room, peerUser }) {
     if (!room) return;
     const plain = text.trim();
     if (!plain && !file) return;
+
+    if (!file && !editingId && /^@leo\b/i.test(plain)) {
+      setText("");
+      const noteId = `note-${Date.now()}`;
+      setLocalNotes((prev) => [...prev, { id: noteId, mine: true, text: plain, created_at: Date.now() }]);
+      setLeoThinking(true);
+      try {
+        const reply = await onLeoCommand(plain);
+        setLocalNotes((prev) => [...prev, { id: `${noteId}-r`, mine: false, text: reply, created_at: Date.now() }]);
+      } finally {
+        setLeoThinking(false);
+      }
+      return;
+    }
+
     if (!canEncrypt) return;
 
     let payload = { body: plain || null };
@@ -528,6 +546,27 @@ export default function ChatWindow({ currentUser, room, peerUser }) {
             </div>
           );
         })}
+
+        {localNotes.length > 0 && (
+          <div className="pt-3 mt-2 border-t border-dashed border-white/10">
+            <p className="text-[10px] uppercase tracking-wider text-white/25 mb-2 px-1">🔒 Only visible to you — never sent to {room.displayName}</p>
+            {localNotes.map((n) => (
+              <div key={n.id} className={`flex ${n.mine ? "justify-end" : "justify-start"} mb-1.5 animate-floatIn`}>
+                <div
+                  className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed border ${
+                    n.mine
+                      ? "bg-white/10 border-white/15 text-white/90 rounded-br-md"
+                      : "bg-transparent border-white/10 text-white/70 rounded-bl-md"
+                  }`}
+                >
+                  {!n.mine && <span className="block text-[10px] text-white/35 mb-0.5">✨ Leo</span>}
+                  <p className="whitespace-pre-wrap break-words">{n.text}</p>
+                </div>
+              </div>
+            ))}
+            {leoThinking && <p className="text-xs text-white/30 px-1 animate-pulseDot">Leo is thinking…</p>}
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -596,7 +635,7 @@ export default function ChatWindow({ currentUser, room, peerUser }) {
                   sendMessage();
                 }
               }}
-              placeholder={canEncrypt ? "Type a message…" : "Encryption not ready…"}
+              placeholder={canEncrypt ? "Type a message… (try @leo remind me in 5 min)" : "Encryption not ready…"}
               disabled={!canEncrypt}
               className="flex-1 bg-transparent outline-none text-white placeholder-white/25 resize-none py-2 max-h-32 disabled:opacity-40"
             />
