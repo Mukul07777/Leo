@@ -59,6 +59,20 @@ export async function getPublicKeyFor(userId) {
   return res.json();
 }
 
+export async function createGroup(userId, name, memberIds) {
+  const res = await fetch(`${API_BASE}/api/groups`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name, memberIds }),
+  });
+  return res.json();
+}
+
+export async function getRoomMembers(roomId) {
+  const res = await fetch(`${API_BASE}/api/rooms/${roomId}/members`);
+  return res.json();
+}
+
 export async function searchMessages(roomId, query) {
   const res = await fetch(`${API_BASE}/api/search/${roomId}?q=${encodeURIComponent(query)}`);
   return res.json();

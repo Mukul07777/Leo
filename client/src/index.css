@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #050507;
+  --bg-solid: #000000;
+  --text: #f4f4f5;
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --text-faint: rgba(255, 255, 255, 0.35);
+  --text-ghost: rgba(255, 255, 255, 0.22);
+
+  --surface-1: rgba(255, 255, 255, 0.045);
+  --surface-2: rgba(255, 255, 255, 0.09);
+  --surface-3: rgba(255, 255, 255, 0.14);
+  --border-1: rgba(255, 255, 255, 0.09);
+  --border-2: rgba(255, 255, 255, 0.16);
+
+  --glass-bg: rgba(255, 255, 255, 0.035);
+  --glass-strong-bg: rgba(255, 255, 255, 0.055);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --card-bg: rgba(10, 10, 12, 0.55);
+  --card-tint: rgba(255, 255, 255, 0.07);
+
+  --orb: rgba(255, 255, 255, 0.09);
+  --grid-line: rgba(255, 255, 255, 0.035);
+  --danger: #f87171;
+  --success: #4ade80;
+
+  --accent-1: #ffffff;
+  --accent-2: #cfcfd4;
+  --accent-text: #0a0a0a;
+  --accent-glow: rgba(255, 255, 255, 0.4);
+  --accent-glow-soft: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="light"] {
+  --bg: #eef0f3;
+  --bg-solid: #e8eaee;
+  --text: #101114;
+  --text-dim: rgba(16, 17, 20, 0.58);
+  --text-faint: rgba(16, 17, 20, 0.38);
+  --text-ghost: rgba(16, 17, 20, 0.25);
+
+  --surface-1: rgba(16, 17, 20, 0.04);
+  --surface-2: rgba(16, 17, 20, 0.075);
+  --surface-3: rgba(16, 17, 20, 0.12);
+  --border-1: rgba(16, 17, 20, 0.09);
+  --border-2: rgba(16, 17, 20, 0.16);
+
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-strong-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(16, 17, 20, 0.08);
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --card-tint: rgba(255, 255, 255, 0.5);
+
+  --orb: rgba(16, 17, 20, 0.06);
+  --grid-line: rgba(16, 17, 20, 0.035);
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -9,42 +65,43 @@ html, body, #root {
 
 body {
   background:
-    radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.08), transparent 40%),
-    radial-gradient(circle at 85% 20%, rgba(255, 255, 255, 0.06), transparent 45%),
-    radial-gradient(circle at 50% 95%, rgba(255, 255, 255, 0.05), transparent 50%),
-    #000000;
-  color: #f4f4f5;
+    radial-gradient(circle at 15% 10%, var(--orb), transparent 40%),
+    radial-gradient(circle at 85% 20%, var(--orb), transparent 45%),
+    radial-gradient(circle at 50% 95%, var(--orb), transparent 50%),
+    var(--bg-solid);
+  color: var(--text);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .grid-overlay {
   background-image:
-    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 42px 42px;
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--border-2);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.22); }
+::-webkit-scrollbar-thumb:hover { background: var(--surface-3); }
 
 .glass {
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px) saturate(120%);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--glass-strong-bg);
   backdrop-filter: blur(24px) saturate(130%);
   -webkit-backdrop-filter: blur(24px) saturate(130%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
 }
 
 .gradient-border {
@@ -56,7 +113,7 @@ body {
   inset: 0;
   padding: 1px;
   border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.06), rgba(255,255,255,0.3));
+  background: linear-gradient(135deg, var(--accent-glow), transparent, var(--accent-glow-soft));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -64,20 +121,20 @@ body {
 }
 
 .mono-glow {
-  box-shadow: 0 0 45px -8px rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 45px -8px var(--accent-glow);
 }
 
-/* Premium glossy "mirror" button: bright gradient body + a soft top highlight
+/* Premium glossy "mirror" button: bright accent gradient body + a soft top highlight
    that simulates light reflecting off a polished surface, plus a sheen sweep on hover. */
 .btn-mirror {
   position: relative;
-  background: linear-gradient(180deg, #ffffff 0%, #e4e4e7 55%, #cfcfd4 100%);
-  color: #0a0a0a;
+  background: linear-gradient(180deg, var(--accent-1) 0%, var(--accent-2) 100%);
+  color: var(--accent-text);
   isolation: isolate;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
     0 -1px 12px rgba(0, 0, 0, 0.15) inset,
-    0 12px 30px -10px rgba(255, 255, 255, 0.45),
+    0 12px 30px -10px var(--accent-glow),
     0 2px 6px rgba(0, 0, 0, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
@@ -86,7 +143,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0) 55%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0) 55%);
   opacity: 0.9;
   pointer-events: none;
 }
@@ -115,7 +172,7 @@ body {
   filter: brightness(0.97);
 }
 .btn-mirror:disabled {
-  filter: grayscale(0.3) brightness(0.7);
+  filter: grayscale(0.3) brightness(0.85);
 }
 
 @keyframes sheen {
@@ -126,46 +183,45 @@ body {
 /* Secondary ghost mirror button (glass with a faint top highlight, for less prominent actions) */
 .btn-mirror-ghost {
   position: relative;
-  background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 100%);
-  border: 1px solid rgba(255,255,255,0.14);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset;
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 100%);
+  border: 1px solid var(--border-1);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
+  color: var(--text);
   transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 }
 .btn-mirror-ghost:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 100%);
-  border-color: rgba(255,255,255,0.28);
+  background: linear-gradient(180deg, var(--surface-3) 0%, var(--surface-2) 100%);
+  border-color: var(--border-2);
 }
 .btn-mirror-ghost:active:not(:disabled) {
   transform: scale(0.98);
 }
 
 .premium-card {
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%),
-    rgba(10, 10, 12, 0.55);
+  background: linear-gradient(180deg, var(--card-tint) 0%, transparent 100%), var(--card-bg);
   backdrop-filter: blur(28px) saturate(160%);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid var(--glass-border);
   box-shadow:
     0 1px 0 rgba(255,255,255,0.18) inset,
-    0 25px 80px -20px rgba(0,0,0,0.8),
-    0 0 60px -15px rgba(255,255,255,0.12);
+    0 25px 80px -20px rgba(0,0,0,0.5),
+    0 0 60px -15px var(--accent-glow-soft);
 }
 
 .premium-input {
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 2px 10px rgba(0,0,0,0.25) inset;
+  background: linear-gradient(180deg, var(--surface-1), var(--surface-1));
+  border: 1px solid var(--border-1);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 2px 10px rgba(0,0,0,0.12) inset;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .premium-input:focus-within {
-  border-color: rgba(255,255,255,0.45);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.08), 0 1px 0 rgba(255,255,255,0.08) inset;
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px var(--accent-glow-soft), 0 1px 0 rgba(255,255,255,0.06) inset;
+  background: var(--surface-2);
 }
 
 .logo-metal {
-  background: linear-gradient(155deg, #ffffff 0%, #e8e8ec 25%, #a8a8b0 50%, #f4f4f6 75%, #d4d4d8 100%);
+  background: linear-gradient(155deg, var(--accent-1) 0%, var(--accent-2) 50%, var(--accent-1) 100%);
   background-size: 220% 220%;
   animation: metalShift 6s ease-in-out infinite;
 }
@@ -180,3 +236,20 @@ body {
 }
 .orb-drift { animation: orbDrift 12s ease-in-out infinite; }
 .orb-drift-slow { animation: orbDrift 18s ease-in-out infinite reverse; }
+
+/* Semantic text/surface utilities so components adapt across themes without per-element overrides */
+.t-text { color: var(--text); }
+.t-dim { color: var(--text-dim); }
+.t-faint { color: var(--text-faint); }
+.t-ghost { color: var(--text-ghost); }
+.surface-1 { background: var(--surface-1); }
+.surface-2 { background: var(--surface-2); }
+.border-theme { border-color: var(--border-1); }
+.hover-surface:hover { background: var(--surface-2); }
+.accent-text { color: var(--accent-1); }
+.accent-dot { background: var(--accent-1); }
+.accent-grad {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: var(--accent-text);
+}
+.accent-ring { box-shadow: 0 0 0 2px var(--accent-glow-soft); }

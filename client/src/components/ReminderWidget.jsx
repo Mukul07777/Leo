@@ -28,14 +28,14 @@ export default function ReminderWidget({ reminders, onDismiss }) {
         return (
           <div
             key={r.id}
-            className={`glass-strong rounded-2xl px-4 py-3 mono-glow animate-floatIn flex items-center gap-3 ${done ? "border-white/30" : ""}`}
+            className={`glass-strong rounded-2xl px-4 py-3 mono-glow animate-floatIn flex items-center gap-3 ${done ? "border-[var(--border-2)]" : ""}`}
           >
             <span className="text-xl">{done ? "✅" : "⏰"}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/90 truncate">{r.label}</p>
-              <p className="text-xs text-white/40">{done ? "Leo · reminder fired" : `Leo · in ${formatRemaining(remaining)}`}</p>
+              <p className="text-sm text-[var(--text)] truncate">{r.label}</p>
+              <p className="text-xs text-[var(--text-faint)]">{done ? "Leo · reminder fired" : `Leo · in ${formatRemaining(remaining)}`}</p>
             </div>
-            <button onClick={() => onDismiss(r.id)} className="text-white/30 hover:text-white/70 text-sm px-1">
+            <button onClick={() => onDismiss(r.id)} className="text-[var(--text-faint)] hover:text-[var(--text-dim)] text-sm px-1">
               ✕
             </button>
           </div>

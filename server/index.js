@@ -33,17 +33,6 @@ function pickColor() {
   return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
 }
 
-function getOrCreateGeneralRoom() {
-  let room = db.prepare("SELECT * FROM rooms WHERE is_dm = 0 AND name = 'general'").get();
-  if (!room) {
-    const id = nanoid(10);
-    db.prepare("INSERT INTO rooms (id, name, is_dm, encrypted, created_at) VALUES (?,?,0,0,?)").run(id, "general", Date.now());
-    room = db.prepare("SELECT * FROM rooms WHERE id = ?").get(id);
-  }
-  return room;
-}
-getOrCreateGeneralRoom();
-
 function attachReactions(messages) {
   if (messages.length === 0) return messages;
   const ids = messages.map((m) => m.id);
@@ -82,8 +71,6 @@ app.post("/api/login", (req, res) => {
     );
     user = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
   }
-  const general = getOrCreateGeneralRoom();
-  db.prepare("INSERT OR IGNORE INTO room_members (room_id, user_id) VALUES (?,?)").run(general.id, user.id);
 
   res.json({ user });
 });
@@ -115,6 +102,7 @@ app.get("/api/rooms/:userId", (req, res) => {
   const withMeta = rooms.map((r) => {
     let displayName = r.name;
     let otherUserId = null;
+    let memberCount = null;
     if (r.is_dm) {
       const other = db.prepare(`
         SELECT u.id, u.username FROM room_members rm
@@ -123,11 +111,37 @@ app.get("/api/rooms/:userId", (req, res) => {
       `).get(r.id, req.params.userId);
       displayName = other ? other.username : r.name;
       otherUserId = other ? other.id : null;
+    } else {
+      memberCount = db.prepare("SELECT COUNT(*) AS c FROM room_members WHERE room_id = ?").get(r.id).c;
     }
     const lastMsg = db.prepare("SELECT * FROM messages WHERE room_id = ? ORDER BY created_at DESC LIMIT 1").get(r.id);
-    return { ...r, displayName, otherUserId, lastMsg };
+    return { ...r, displayName, otherUserId, memberCount, lastMsg };
   });
   res.json(withMeta);
+});
+
+app.post("/api/groups", (req, res) => {
+  const { userId, name, memberIds } = req.body;
+  const uname = (name || "").trim().slice(0, 40);
+  if (!uname) return res.status(400).json({ error: "group name required" });
+  const members = [...new Set([userId, ...(memberIds || [])])].filter(Boolean);
+  if (members.length < 2) return res.status(400).json({ error: "pick at least one other member" });
+
+  const id = nanoid(10);
+  db.prepare("INSERT INTO rooms (id, name, is_dm, encrypted, created_at) VALUES (?,?,0,0,?)").run(id, uname, Date.now());
+  const insertMember = db.prepare("INSERT OR IGNORE INTO room_members (room_id, user_id) VALUES (?,?)");
+  for (const uid of members) insertMember.run(id, uid);
+
+  res.json({ roomId: id });
+});
+
+app.get("/api/rooms/:roomId/members", (req, res) => {
+  const members = db.prepare(`
+    SELECT u.id, u.username, u.avatar_color FROM room_members rm
+    JOIN users u ON u.id = rm.user_id
+    WHERE rm.room_id = ?
+  `).all(req.params.roomId);
+  res.json(members);
 });
 
 app.post("/api/dm", (req, res) => {

@@ -3,7 +3,7 @@ import Login from "./components/Login.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import ChatWindow from "./components/ChatWindow.jsx";
 import ReminderWidget from "./components/ReminderWidget.jsx";
-import { getUsers, getRooms, openDm, getOnline, registerPublicKey, getAiAssistantReply } from "./lib/api.js";
+import { getUsers, getRooms, openDm, createGroup, getOnline, registerPublicKey, getAiAssistantReply } from "./lib/api.js";
 import { getSocket } from "./lib/socket.js";
 import { ensureKeyPair } from "./lib/crypto.js";
 import { parseLeoCommand, unitToMs } from "./lib/assistant.js";
@@ -126,6 +126,13 @@ export default function App() {
     setActiveRoomId(roomId);
   }
 
+  async function handleCreateGroup(name, memberIds) {
+    const { roomId, error } = await createGroup(currentUser.id, name, memberIds);
+    if (error) return;
+    await refreshRooms();
+    setActiveRoomId(roomId);
+  }
+
   function handleLogout() {
     localStorage.removeItem("leo_user");
     setCurrentUser(null);
@@ -135,8 +142,8 @@ export default function App() {
   return (
     <div className="h-full w-full p-4 flex gap-4">
       <div className="absolute inset-0 overflow-hidden -z-10 grid-overlay">
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-white/8 blur-3xl" />
-        <div className="absolute -bottom-40 -right-20 w-96 h-96 rounded-full bg-white/6 blur-3xl" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[var(--surface-2)] blur-3xl" />
+        <div className="absolute -bottom-40 -right-20 w-96 h-96 rounded-full bg-[var(--surface-1)] blur-3xl" />
       </div>
       <Sidebar
         currentUser={currentUser}
@@ -146,6 +153,7 @@ export default function App() {
         activeRoomId={activeRoomId}
         onSelectRoom={setActiveRoomId}
         onSelectUser={handleSelectUser}
+        onCreateGroup={handleCreateGroup}
         onLogout={handleLogout}
       />
       <ChatWindow currentUser={currentUser} room={activeRoom} peerUser={activeRoomUser} onLeoCommand={runLeoCommand} />

@@ -320,10 +320,10 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
     return (
       <div className="flex-1 h-full glass-strong rounded-3xl flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-white/15 to-white/5 border border-white/10 flex items-center justify-center text-3xl mb-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[var(--surface-3)] to-[var(--surface-1)] border border-[var(--border-1)] flex items-center justify-center text-3xl mb-4">
             💬
           </div>
-          <p className="text-white/40">Select a room or contact to start chatting</p>
+          <p className="text-[var(--text-faint)]">Select a room or contact to start chatting</p>
         </div>
       </div>
     );
@@ -333,27 +333,40 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
 
   return (
     <div className="flex-1 h-full glass-strong rounded-3xl flex flex-col overflow-hidden">
-      <div className="px-6 py-4 border-b border-white/5 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/10 flex items-center justify-center text-sm font-semibold">
-          {room.is_dm ? initials(room.displayName) : "#"}
-        </div>
+      <div className="px-6 py-4 border-b border-[var(--border-1)] flex items-center gap-3">
+        {room.is_dm ? (
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold text-black"
+            style={{ background: peerUser?.avatar_color || "#a1a1aa" }}
+          >
+            {initials(room.displayName)}
+          </div>
+        ) : (
+          <div className="w-10 h-10 rounded-xl accent-grad flex items-center justify-center text-sm font-semibold">
+            {initials(room.displayName)}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="text-white font-medium truncate">{room.displayName}</p>
+            <p className="text-[var(--text)] font-medium truncate">{room.displayName}</p>
             {isEncrypted && (
-              <span title={canEncrypt ? "End-to-end encrypted" : "Waiting for encryption keys…"} className="text-[11px] text-white/40">
+              <span title={canEncrypt ? "End-to-end encrypted" : "Waiting for encryption keys…"} className="text-[11px] text-[var(--text-faint)]">
                 {canEncrypt ? "🔒" : "🔓"}
               </span>
             )}
           </div>
-          <p className="text-xs text-white/35 h-4 truncate">
-            {typingNames.length > 0 ? `${typingNames.join(", ")} typing…` : ""}
+          <p className="text-xs text-[var(--text-faint)] h-4 truncate">
+            {typingNames.length > 0
+              ? `${typingNames.join(", ")} typing…`
+              : !room.is_dm && room.memberCount
+              ? `${room.memberCount} members`
+              : ""}
           </p>
         </div>
         {aiAvailable && (
           <button
             onClick={requestSummary}
-            className="text-xs text-white/50 hover:text-white px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors border border-white/10"
+            className="text-xs text-[var(--text-dim)] hover:text-[var(--text)] px-3 py-1.5 rounded-lg hover:bg-[var(--surface-1)] transition-colors border border-[var(--border-1)]"
             title="AI summary of this chat (runs locally via Ollama)"
           >
             ✨ Summarize
@@ -361,7 +374,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
         )}
         <button
           onClick={() => setSearchOpen((v) => !v)}
-          className={`text-white/40 hover:text-white/80 p-2 rounded-xl hover:bg-white/5 transition-colors ${searchOpen ? "bg-white/10 text-white" : ""}`}
+          className={`text-[var(--text-faint)] hover:text-[var(--text)] p-2 rounded-xl hover:bg-[var(--surface-1)] transition-colors ${searchOpen ? "bg-[var(--surface-2)] text-[var(--text)]" : ""}`}
           title="Search messages"
         >
           🔍
@@ -369,20 +382,20 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
       </div>
 
       {searchOpen && (
-        <div className="px-6 py-3 border-b border-white/5 glass">
+        <div className="px-6 py-3 border-b border-[var(--border-1)] glass">
           <input
             autoFocus
             value={searchQuery}
             onChange={(e) => runSearch(e.target.value)}
             placeholder={isEncrypted ? "Search unavailable for encrypted chats" : "Search messages…"}
             disabled={isEncrypted}
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-white/25 outline-none focus:border-white/30 disabled:opacity-40"
+            className="w-full bg-[var(--surface-1)] border border-[var(--border-1)] rounded-lg px-3 py-2 text-sm text-[var(--text)] placeholder-[var(--text-faint)] outline-none focus:border-[var(--border-2)] disabled:opacity-40"
           />
           {searchResults.length > 0 && (
             <div className="mt-2 max-h-40 overflow-y-auto space-y-1">
               {searchResults.map((r) => (
-                <div key={r.id} className="text-xs text-white/60 px-2 py-1.5 rounded-lg bg-white/5">
-                  <span className="text-white/80 font-medium">{r.username}: </span>
+                <div key={r.id} className="text-xs text-[var(--text-dim)] px-2 py-1.5 rounded-lg bg-[var(--surface-1)]">
+                  <span className="text-[var(--text)] font-medium">{r.username}: </span>
                   {r.body}
                 </div>
               ))}
@@ -392,10 +405,10 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
       )}
 
       {summary !== null && (
-        <div className="mx-6 mt-3 p-4 rounded-2xl glass border border-white/10 relative animate-floatIn">
-          <button onClick={() => setSummary(null)} className="absolute top-2 right-3 text-white/30 hover:text-white/70">✕</button>
-          <p className="text-xs uppercase tracking-wider text-white/40 mb-2">✨ AI Summary (local)</p>
-          <p className="text-sm text-white/80 whitespace-pre-wrap leading-relaxed">{summaryLoading ? "Thinking…" : summary}</p>
+        <div className="mx-6 mt-3 p-4 rounded-2xl glass border border-[var(--border-1)] relative animate-floatIn">
+          <button onClick={() => setSummary(null)} className="absolute top-2 right-3 text-[var(--text-faint)] hover:text-[var(--text-dim)]">✕</button>
+          <p className="text-xs uppercase tracking-wider text-[var(--text-faint)] mb-2">✨ AI Summary (local)</p>
+          <p className="text-sm text-[var(--text)] whitespace-pre-wrap leading-relaxed">{summaryLoading ? "Thinking…" : summary}</p>
         </div>
       )}
 
@@ -426,19 +439,19 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
 
               <div className={`max-w-[65%] ${mine ? "items-end" : "items-start"} flex flex-col relative`}>
                 {!mine && showAvatar && (
-                  <span className="text-[11px] text-white/35 mb-1 ml-1">{m.username}</span>
+                  <span className="text-[11px] text-[var(--text-faint)] mb-1 ml-1">{m.username}</span>
                 )}
 
                 <div className={`flex items-center gap-1.5 ${mine ? "flex-row-reverse" : "flex-row"}`}>
                   <div
                     className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed shadow-lg relative ${
                       mine
-                        ? "bg-gradient-to-br from-white to-zinc-200 text-black rounded-br-md"
-                        : "glass text-white/90 rounded-bl-md"
+                        ? "accent-grad rounded-br-md"
+                        : "glass text-[var(--text)] rounded-bl-md"
                     } ${m.deleted ? "opacity-50 italic" : ""}`}
                   >
                     {m.reply_preview && !m.deleted && (
-                      <div className={`text-xs mb-1.5 pl-2 border-l-2 ${mine ? "border-black/20 text-black/60" : "border-white/20 text-white/50"}`}>
+                      <div className={`text-xs mb-1.5 pl-2 border-l-2 ${mine ? "border-[var(--accent-text)]/20 text-[var(--accent-text)]/70" : "border-[var(--border-2)] text-[var(--text-dim)]"}`}>
                         <span className="font-medium">{m.reply_preview.username}</span>{" "}
                         {m.reply_preview.deleted
                           ? "message deleted"
@@ -473,7 +486,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
                           )
                         )}
                         {body && <p className="whitespace-pre-wrap break-words">{body}</p>}
-                        <span className={`block text-[10px] mt-1 ${mine ? "text-black/50" : "text-white/30"}`}>
+                        <span className={`block text-[10px] mt-1 ${mine ? "text-[var(--accent-text)]/60" : "text-[var(--text-faint)]"}`}>
                           {formatTime(m.created_at)}{m.edited_at ? " · edited" : ""}
                         </span>
                       </>
@@ -484,14 +497,14 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 text-xs relative">
                       <button
                         onClick={() => setOpenPickerFor(openPickerFor === m.id ? null : m.id)}
-                        className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white"
+                        className="p-1.5 rounded-lg hover:bg-[var(--surface-2)] text-[var(--text-faint)] hover:text-[var(--text)]"
                         title="React"
                       >
                         😊
                       </button>
                       <button
                         onClick={() => { setReplyTarget(m); setEditingId(null); }}
-                        className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white"
+                        className="p-1.5 rounded-lg hover:bg-[var(--surface-2)] text-[var(--text-faint)] hover:text-[var(--text)]"
                         title="Reply"
                       >
                         ↩
@@ -499,7 +512,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
                       {mine && (
                         <button
                           onClick={() => setOpenMenuFor(openMenuFor === m.id ? null : m.id)}
-                          className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface-2)] text-[var(--text-faint)] hover:text-[var(--text)]"
                           title="More"
                         >
                           ⋯
@@ -518,9 +531,9 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
                       {openMenuFor === m.id && (
                         <div className={`absolute z-10 top-8 ${mine ? "right-0" : "left-0"} glass-strong rounded-xl py-1 shadow-glow min-w-24 text-left`}>
                           {(m.body || m.cipher) && !m.file_url && (
-                            <button onClick={() => startEdit(m)} className="w-full text-left px-3 py-1.5 text-xs text-white/70 hover:bg-white/10">Edit</button>
+                            <button onClick={() => startEdit(m)} className="w-full text-left px-3 py-1.5 text-xs text-[var(--text-dim)] hover:bg-[var(--surface-2)]">Edit</button>
                           )}
-                          <button onClick={() => deleteMessage(m)} className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-white/10">Delete</button>
+                          <button onClick={() => deleteMessage(m)} className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-[var(--surface-2)]">Delete</button>
                         </div>
                       )}
                     </div>
@@ -534,7 +547,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
                         key={emoji}
                         onClick={() => toggleReaction(m.id, emoji)}
                         className={`text-xs px-1.5 py-0.5 rounded-full border transition-colors ${
-                          uids.includes(currentUser.id) ? "bg-white/20 border-white/30" : "bg-white/5 border-white/10"
+                          uids.includes(currentUser.id) ? "bg-[var(--surface-3)] border-[var(--border-2)]" : "bg-[var(--surface-1)] border-[var(--border-1)]"
                         }`}
                       >
                         {emoji} {uids.length}
@@ -548,23 +561,23 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
         })}
 
         {localNotes.length > 0 && (
-          <div className="pt-3 mt-2 border-t border-dashed border-white/10">
-            <p className="text-[10px] uppercase tracking-wider text-white/25 mb-2 px-1">🔒 Only visible to you — never sent to {room.displayName}</p>
+          <div className="pt-3 mt-2 border-t border-dashed border-[var(--border-1)]">
+            <p className="text-[10px] uppercase tracking-wider text-[var(--text-ghost)] mb-2 px-1">🔒 Only visible to you — never sent to {room.displayName}</p>
             {localNotes.map((n) => (
               <div key={n.id} className={`flex ${n.mine ? "justify-end" : "justify-start"} mb-1.5 animate-floatIn`}>
                 <div
                   className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed border ${
                     n.mine
-                      ? "bg-white/10 border-white/15 text-white/90 rounded-br-md"
-                      : "bg-transparent border-white/10 text-white/70 rounded-bl-md"
+                      ? "bg-[var(--surface-2)] border-[var(--border-2)] text-[var(--text)] rounded-br-md"
+                      : "bg-transparent border-[var(--border-1)] text-[var(--text-dim)] rounded-bl-md"
                   }`}
                 >
-                  {!n.mine && <span className="block text-[10px] text-white/35 mb-0.5">✨ Leo</span>}
+                  {!n.mine && <span className="block text-[10px] text-[var(--text-faint)] mb-0.5">✨ Leo</span>}
                   <p className="whitespace-pre-wrap break-words">{n.text}</p>
                 </div>
               </div>
             ))}
-            {leoThinking && <p className="text-xs text-white/30 px-1 animate-pulseDot">Leo is thinking…</p>}
+            {leoThinking && <p className="text-xs text-[var(--text-faint)] px-1 animate-pulseDot">Leo is thinking…</p>}
           </div>
         )}
         <div ref={bottomRef} />
@@ -576,7 +589,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
             <button
               key={i}
               onClick={() => { setText(s); setAiSuggestions([]); }}
-              className="text-xs px-3 py-1.5 rounded-full glass border border-white/10 text-white/70 hover:text-white hover:border-white/30 transition-colors"
+              className="text-xs px-3 py-1.5 rounded-full glass border border-[var(--border-1)] text-[var(--text-dim)] hover:text-[var(--text)] hover:border-[var(--border-2)] transition-colors"
             >
               {s}
             </button>
@@ -586,15 +599,15 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
 
       {(replyTarget || editingId) && (
         <div className="px-6 pt-2 flex items-center gap-2">
-          <div className="flex-1 glass rounded-xl px-3 py-2 flex items-center justify-between border-l-2 border-white/30">
-            <div className="text-xs text-white/60 truncate">
+          <div className="flex-1 glass rounded-xl px-3 py-2 flex items-center justify-between border-l-2 border-[var(--border-2)]">
+            <div className="text-xs text-[var(--text-dim)] truncate">
               {editingId ? "Editing message" : (
-                <>Replying to <span className="text-white/90 font-medium">{replyTarget.username}</span>: {bodyOf(replyTarget) || replyTarget.file_name}</>
+                <>Replying to <span className="text-[var(--text)] font-medium">{replyTarget.username}</span>: {bodyOf(replyTarget) || replyTarget.file_name}</>
               )}
             </div>
             <button
               onClick={() => { setReplyTarget(null); setEditingId(null); setText(""); }}
-              className="text-white/40 hover:text-white/80 ml-2"
+              className="text-[var(--text-faint)] hover:text-[var(--text)] ml-2"
             >
               ✕
             </button>
@@ -602,7 +615,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
         </div>
       )}
 
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t border-[var(--border-1)]">
         {!canEncrypt && (
           <p className="text-xs text-amber-400/80 mb-2 px-1">
             Waiting for {room.displayName} to come online at least once to set up encryption before you can message them.
@@ -612,7 +625,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || !canEncrypt}
-            className="text-white/40 hover:text-white/80 p-2 rounded-xl hover:bg-white/5 transition-colors disabled:opacity-40"
+            className="text-[var(--text-faint)] hover:text-[var(--text)] p-2 rounded-xl hover:bg-[var(--surface-1)] transition-colors disabled:opacity-40"
             title="Attach file"
           >
             {uploading ? "…" : "📎"}
@@ -620,7 +633,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
           <input ref={fileInputRef} type="file" className="hidden" onChange={handleFilePick} />
 
           {recording ? (
-            <div className="flex-1 flex items-center gap-2 py-2 text-sm text-white/70">
+            <div className="flex-1 flex items-center gap-2 py-2 text-sm text-[var(--text-dim)]">
               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulseDot" />
               Recording… {formatDuration(recordSeconds)}
             </div>
@@ -637,7 +650,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
               }}
               placeholder={canEncrypt ? "Type a message… (try @leo remind me in 5 min)" : "Encryption not ready…"}
               disabled={!canEncrypt}
-              className="flex-1 bg-transparent outline-none text-white placeholder-white/25 resize-none py-2 max-h-32 disabled:opacity-40"
+              className="flex-1 bg-transparent outline-none text-[var(--text)] placeholder-[var(--text-faint)] resize-none py-2 max-h-32 disabled:opacity-40"
             />
           )}
 
@@ -645,7 +658,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
             <button
               onClick={requestAiReplies}
               disabled={aiLoading}
-              className="text-white/40 hover:text-white/80 p-2 rounded-xl hover:bg-white/5 transition-colors disabled:opacity-40"
+              className="text-[var(--text-faint)] hover:text-[var(--text)] p-2 rounded-xl hover:bg-[var(--surface-1)] transition-colors disabled:opacity-40"
               title="AI reply suggestions (local)"
             >
               {aiLoading ? "…" : "✨"}
@@ -656,7 +669,7 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
             onClick={recording ? stopRecording : (text.trim() ? () => sendMessage() : startRecording)}
             disabled={!canEncrypt}
             className={`rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-all ${
-              recording ? "bg-red-500 text-white hover:brightness-95 active:scale-95" : "btn-mirror"
+              recording ? "bg-red-500 text-[var(--text)] hover:brightness-95 active:scale-95" : "btn-mirror"
             }`}
           >
             {recording ? "Stop" : text.trim() ? "Send" : "🎙"}
