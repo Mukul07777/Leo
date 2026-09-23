@@ -616,8 +616,8 @@ export default function ChatWindow({ currentUser, room, peerUser }) {
           <button
             onClick={recording ? stopRecording : (text.trim() ? () => sendMessage() : startRecording)}
             disabled={!canEncrypt}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-95 active:scale-95 transition-all ${
-              recording ? "bg-red-500 text-white" : "bg-gradient-to-r from-white to-zinc-300 text-black"
+            className={`rounded-xl px-4 py-2 text-sm font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-all ${
+              recording ? "bg-red-500 text-white hover:brightness-95 active:scale-95" : "btn-mirror"
             }`}
           >
             {recording ? "Stop" : text.trim() ? "Send" : "🎙"}
