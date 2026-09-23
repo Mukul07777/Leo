@@ -1,14 +1,30 @@
 import { useState } from "react";
+import { avatarTextColor } from "../lib/color.js";
 
 function initials(name) {
   return name.slice(0, 2).toUpperCase();
+}
+
+function shareableUrl() {
+  const { hostname, protocol, port } = window.location;
+  if (hostname === "localhost" || hostname === "127.0.0.1") return null;
+  return `${protocol}//${hostname}${port ? `:${port}` : ""}`;
 }
 
 export default function NewChatModal({ users, currentUser, onClose, onSelectUser, onCreateGroup }) {
   const [mode, setMode] = useState("chat"); // 'chat' | 'group'
   const [groupName, setGroupName] = useState("");
   const [selected, setSelected] = useState([]);
+  const [copied, setCopied] = useState(false);
   const others = users.filter((u) => u.id !== currentUser.id);
+  const url = shareableUrl();
+
+  function handleCopy() {
+    navigator.clipboard?.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
 
   function toggleMember(id) {
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -53,9 +69,25 @@ export default function NewChatModal({ users, currentUser, onClose, onSelectUser
 
         <div className="max-h-64 overflow-y-auto space-y-1">
           {others.length === 0 && (
-            <p className="text-xs text-[var(--text-faint)] py-6 text-center">
-              No other users yet — open the app on another device to see them here.
-            </p>
+            <div className="py-6 px-2 text-center">
+              <p className="text-2xl mb-2">📡</p>
+              <p className="text-sm text-[var(--text-dim)] mb-1">Nobody's joined yet</p>
+              <p className="text-xs text-[var(--text-faint)] mb-3">
+                There's no "add user" step — anyone who opens this app on the same Wi-Fi and picks a username shows up here automatically.
+              </p>
+              {url ? (
+                <button
+                  onClick={handleCopy}
+                  className="text-xs px-3 py-2 rounded-lg bg-[var(--surface-1)] border border-[var(--border-1)] text-[var(--text-dim)] hover:bg-[var(--surface-2)] transition-colors font-mono"
+                >
+                  {copied ? "Copied!" : `📋 ${url}`}
+                </button>
+              ) : (
+                <p className="text-[11px] text-[var(--text-ghost)]">
+                  Find your laptop's IP with <code className="text-[var(--text-faint)]">ipconfig</code>, then share <code className="text-[var(--text-faint)]">http://&lt;that-ip&gt;:5173</code> with others on your Wi-Fi.
+                </p>
+              )}
+            </div>
           )}
           {others.map((u) => {
             const isSelected = selected.includes(u.id);
@@ -68,8 +100,8 @@ export default function NewChatModal({ users, currentUser, onClose, onSelectUser
                 }`}
               >
                 <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold text-black shrink-0"
-                  style={{ background: u.avatar_color }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
+                  style={{ background: u.avatar_color, color: avatarTextColor(u.avatar_color) }}
                 >
                   {initials(u.username)}
                 </div>

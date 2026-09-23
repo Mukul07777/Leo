@@ -2,6 +2,7 @@ import { useState } from "react";
 import SettingsPanel from "./SettingsPanel.jsx";
 import NewChatModal from "./NewChatModal.jsx";
 import { loadCompanion } from "../lib/companion.js";
+import { avatarTextColor } from "../lib/color.js";
 
 function initials(name) {
   return (name || "?").slice(0, 2).toUpperCase();
@@ -59,8 +60,8 @@ export default function Sidebar({
       <div className="p-5 flex items-center gap-3 border-b border-[var(--border-1)]">
         <button
           onClick={() => setShowSettings((v) => !v)}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-black mono-glow shrink-0 hover:brightness-95 transition-all"
-          style={{ background: currentUser.avatar_color }}
+          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold mono-glow shrink-0 hover:brightness-95 transition-all"
+          style={{ background: currentUser.avatar_color, color: avatarTextColor(currentUser.avatar_color) }}
           title="Appearance settings"
         >
           {initials(currentUser.username)}
@@ -133,8 +134,11 @@ export default function Sidebar({
               <div className="relative shrink-0">
                 {room.is_dm ? (
                   <div
-                    className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold text-black"
-                    style={{ background: users.find((u) => u.id === room.otherUserId)?.avatar_color || "#a1a1aa" }}
+                    className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold"
+                    style={(() => {
+                      const c = users.find((u) => u.id === room.otherUserId)?.avatar_color || "#a1a1aa";
+                      return { background: c, color: avatarTextColor(c) };
+                    })()}
                   >
                     {initials(room.displayName)}
                   </div>

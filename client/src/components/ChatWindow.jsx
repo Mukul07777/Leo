@@ -5,6 +5,7 @@ import {
 } from "../lib/api.js";
 import { getSocket } from "../lib/socket.js";
 import { encryptMessage, decryptMessage } from "../lib/crypto.js";
+import { avatarTextColor } from "../lib/color.js";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
@@ -336,8 +337,8 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
       <div className="px-6 py-4 border-b border-[var(--border-1)] flex items-center gap-3">
         {room.is_dm ? (
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold text-black"
-            style={{ background: peerUser?.avatar_color || "#a1a1aa" }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold"
+            style={{ background: peerUser?.avatar_color || "#a1a1aa", color: avatarTextColor(peerUser?.avatar_color) }}
           >
             {initials(room.displayName)}
           </div>
@@ -430,8 +431,8 @@ export default function ChatWindow({ currentUser, room, peerUser, onLeoCommand }
             >
               {!mine && (
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-black shrink-0"
-                  style={{ background: m.avatar_color, visibility: showAvatar ? "visible" : "hidden" }}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0"
+                  style={{ background: m.avatar_color, color: avatarTextColor(m.avatar_color), visibility: showAvatar ? "visible" : "hidden" }}
                 >
                   {initials(m.username)}
                 </div>
