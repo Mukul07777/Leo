@@ -247,6 +247,46 @@ app.post("/api/ai/assistant", async (req, res) => {
   }
 });
 
+app.post("/api/ai/companion", async (req, res) => {
+  const { name, memory, history, message } = req.body;
+  try {
+    const companionName = (name || "Leo").trim().slice(0, 24);
+    const recent = (history || []).slice(-20).map((m) => `${m.role === "user" ? "Them" : companionName}: ${m.text}`).join("\n");
+    const memoryBlock = memory
+      ? `What you remember about this person from earlier conversations:\n${memory}\n\n`
+      : "";
+    const prompt = `You are ${companionName}, this person's warm, casual, genuinely caring personal friend inside a private chat app. Nobody else can ever read this conversation. Talk like a real close friend texting — short, natural, curious, occasionally ask how they're doing or follow up on things they've mentioned before. Never say you're an AI assistant or mention being a language model. Keep replies brief (1-3 sentences) like a real text message.\n\n${memoryBlock}Recent conversation:\n${recent}\n\nThem: ${message}\n${companionName}:`;
+    const r = await fetch(`${OLLAMA_URL}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: OLLAMA_MODEL, prompt, stream: false }),
+      signal: AbortSignal.timeout(30000),
+    });
+    const data = await r.json();
+    res.json({ reply: (data.response || "").trim() });
+  } catch (err) {
+    res.status(503).json({ error: "AI unavailable", reply: "" });
+  }
+});
+
+app.post("/api/ai/companion-memory", async (req, res) => {
+  const { name, memory, transcript } = req.body;
+  try {
+    const companionName = (name || "Leo").trim().slice(0, 24);
+    const prompt = `You are maintaining ${companionName}'s private long-term memory of a friend, based on their chat history. Update the memory notes below with new durable facts, preferences, ongoing topics, or events worth remembering from the new conversation. Keep it compact (max 10 short bullet points), merge duplicates, drop anything stale or no longer relevant. Output ONLY the updated bullet list, nothing else.\n\nExisting memory:\n${memory || "(none yet)"}\n\nNew conversation:\n${transcript}\n\nUpdated memory:`;
+    const r = await fetch(`${OLLAMA_URL}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: OLLAMA_MODEL, prompt, stream: false }),
+      signal: AbortSignal.timeout(30000),
+    });
+    const data = await r.json();
+    res.json({ memory: (data.response || "").trim() });
+  } catch (err) {
+    res.status(503).json({ error: "AI unavailable", memory: memory || "" });
+  }
+});
+
 app.post("/api/ai/summarize", async (req, res) => {
   const { history } = req.body;
   try {

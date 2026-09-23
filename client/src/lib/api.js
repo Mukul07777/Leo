@@ -101,6 +101,24 @@ export async function getAiAssistantReply(text) {
   return res.json();
 }
 
+export async function getCompanionReply(name, memory, history, message) {
+  const res = await fetch(`${API_BASE}/api/ai/companion`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, memory, history, message }),
+  });
+  return res.json();
+}
+
+export async function updateCompanionMemory(name, memory, transcript) {
+  const res = await fetch(`${API_BASE}/api/ai/companion-memory`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, memory, transcript }),
+  });
+  return res.json();
+}
+
 export async function getAiSummary(history) {
   const res = await fetch(`${API_BASE}/api/ai/summarize`, {
     method: "POST",

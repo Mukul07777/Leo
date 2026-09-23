@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Login from "./components/Login.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import ChatWindow from "./components/ChatWindow.jsx";
+import CompanionWindow from "./components/CompanionWindow.jsx";
 import ReminderWidget from "./components/ReminderWidget.jsx";
 import { getUsers, getRooms, openDm, createGroup, getOnline, registerPublicKey, getAiAssistantReply } from "./lib/api.js";
 import { getSocket } from "./lib/socket.js";
@@ -117,7 +118,8 @@ export default function App() {
     return <Login onLogin={setCurrentUser} />;
   }
 
-  const activeRoom = rooms.find((r) => r.id === activeRoomId) || null;
+  const companionSelected = activeRoomId === "__companion__";
+  const activeRoom = companionSelected ? null : rooms.find((r) => r.id === activeRoomId) || null;
   const activeRoomUser = activeRoom?.is_dm ? users.find((u) => u.id === activeRoom.otherUserId) : null;
 
   async function handleSelectUser(user) {
@@ -156,7 +158,11 @@ export default function App() {
         onCreateGroup={handleCreateGroup}
         onLogout={handleLogout}
       />
-      <ChatWindow currentUser={currentUser} room={activeRoom} peerUser={activeRoomUser} onLeoCommand={runLeoCommand} />
+      {companionSelected ? (
+        <CompanionWindow currentUser={currentUser} />
+      ) : (
+        <ChatWindow currentUser={currentUser} room={activeRoom} peerUser={activeRoomUser} onLeoCommand={runLeoCommand} />
+      )}
       <ReminderWidget reminders={reminders} onDismiss={dismissReminder} />
     </div>
   );

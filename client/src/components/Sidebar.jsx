@@ -1,6 +1,7 @@
 import { useState } from "react";
 import SettingsPanel from "./SettingsPanel.jsx";
 import NewChatModal from "./NewChatModal.jsx";
+import { loadCompanion } from "../lib/companion.js";
 
 function initials(name) {
   return (name || "?").slice(0, 2).toUpperCase();
@@ -33,6 +34,9 @@ export default function Sidebar({
 }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
+  const companion = loadCompanion(currentUser.id);
+  const companionActive = activeRoomId === "__companion__";
+  const companionLastMsg = companion.messages[companion.messages.length - 1];
 
   const sortedChats = [...rooms].sort((a, b) => {
     const at = a.lastMsg?.created_at || a.created_at;
@@ -84,7 +88,30 @@ export default function Sidebar({
 
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
 
-      <div className="flex-1 overflow-y-auto px-2 py-3">
+      <div className="px-2 pt-3">
+        <button
+          onClick={() => onSelectRoom("__companion__")}
+          className={`w-full text-left px-3 py-2.5 rounded-xl mb-1 transition-all flex items-center gap-3 ${
+            companionActive ? "bg-[var(--surface-2)] mono-glow" : "hover:bg-[var(--surface-1)]"
+          }`}
+        >
+          <div className="w-11 h-11 rounded-full accent-grad flex items-center justify-center text-sm font-semibold shrink-0">
+            {initials(companion.name)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="text-[var(--text)] text-sm font-medium truncate">{companion.name}</p>
+              <span className="text-[9px] uppercase tracking-wide text-[var(--text-ghost)] border border-[var(--border-1)] rounded-full px-1.5 py-0.5">Private</span>
+            </div>
+            <p className="text-[var(--text-faint)] text-xs truncate">
+              {companionLastMsg ? companionLastMsg.text : "Your personal companion · say hi 👋"}
+            </p>
+          </div>
+        </button>
+        <div className="h-px bg-[var(--border-1)] my-2 mx-1" />
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-2 pb-3">
         {sortedChats.length === 0 && (
           <div className="text-center px-6 py-10">
             <p className="text-3xl mb-3">💬</p>
