@@ -11,13 +11,15 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT UNIQUE NOT NULL,
   avatar_color TEXT NOT NULL,
   created_at INTEGER NOT NULL,
-  last_seen INTEGER
+  last_seen INTEGER,
+  public_key TEXT
 );
 
 CREATE TABLE IF NOT EXISTS rooms (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   is_dm INTEGER NOT NULL DEFAULT 0,
+  encrypted INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL
 );
 
@@ -32,10 +34,23 @@ CREATE TABLE IF NOT EXISTS messages (
   room_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
   body TEXT,
+  cipher TEXT,
+  iv TEXT,
   file_url TEXT,
   file_name TEXT,
   file_type TEXT,
+  voice_duration INTEGER,
+  reply_to_id TEXT,
+  edited_at INTEGER,
+  deleted INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS reactions (
+  message_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  emoji TEXT NOT NULL,
+  PRIMARY KEY (message_id, user_id, emoji)
 );
 
 CREATE TABLE IF NOT EXISTS reads (
@@ -44,6 +59,23 @@ CREATE TABLE IF NOT EXISTS reads (
   last_read_message_id TEXT,
   PRIMARY KEY (room_id, user_id)
 );
+
+CREATE VIRTUAL TABLE IF NOT EXISTS messages_fts USING fts5(
+  body, content='messages', content_rowid='rowid'
+);
+
+CREATE TRIGGER IF NOT EXISTS messages_ai AFTER INSERT ON messages BEGIN
+  INSERT INTO messages_fts(rowid, body) VALUES (new.rowid, new.body);
+END;
+
+CREATE TRIGGER IF NOT EXISTS messages_ad AFTER DELETE ON messages BEGIN
+  INSERT INTO messages_fts(messages_fts, rowid, body) VALUES ('delete', old.rowid, old.body);
+END;
+
+CREATE TRIGGER IF NOT EXISTS messages_au AFTER UPDATE ON messages BEGIN
+  INSERT INTO messages_fts(messages_fts, rowid, body) VALUES ('delete', old.rowid, old.body);
+  INSERT INTO messages_fts(rowid, body) VALUES (new.rowid, new.body);
+END;
 `);
 
 // Thin wrapper to keep the better-sqlite3-style call pattern used elsewhere:

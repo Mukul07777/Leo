@@ -32,14 +32,28 @@ Open `http://localhost:5173` in your browser and pick a username.
 ## What's included
 
 - 1-on-1 DMs and a shared `#general` room
+- **End-to-end encryption for DMs** — ECDH (P-256) + AES-GCM, done entirely in the browser with the Web Crypto API. Private keys never leave the device; the server only ever stores ciphertext for DM messages.
 - Real-time messaging via WebSockets (Socket.io)
-- Message history stored locally in SQLite (`server/db/chat.sqlite`)
+- Message replies/quotes, edit, and delete
+- Emoji reactions
+- Voice notes (record and send audio clips)
+- Full-text search (group room only — DMs are encrypted server-side so search happens only in your browser)
+- **Local AI assistant** (optional, via [Ollama](https://ollama.com)) — quick reply suggestions and chat summaries, generated entirely on your machine. If Ollama isn't running, these features just hide themselves; nothing breaks.
 - File & image sharing (stored in `server/uploads/`)
 - Typing indicators and read receipts
 - Online/offline presence
-- Dark, glassy, futuristic UI
+- Dark, glassy, black & white futuristic UI
+
+## Local AI (optional)
+
+To enable the ✨ AI reply suggestions and summaries, install [Ollama](https://ollama.com) and pull a model:
+```
+ollama pull llama3.1:8b
+```
+The server auto-detects Ollama at `http://localhost:11434`. No model installed → those buttons simply don't appear.
 
 ## Notes
 
-- All data stays on your laptop — nothing leaves your network.
+- All data stays on your laptop — nothing leaves your network. AI features run 100% locally too.
+- DM messages are end-to-end encrypted; even direct database access only reveals ciphertext.
 - To reset all chats/users, stop the server and delete `server/db/chat.sqlite`.

@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import Login from "./components/Login.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import ChatWindow from "./components/ChatWindow.jsx";
-import { getUsers, getRooms, openDm, getOnline } from "./lib/api.js";
+import { getUsers, getRooms, openDm, getOnline, registerPublicKey } from "./lib/api.js";
 import { getSocket } from "./lib/socket.js";
+import { ensureKeyPair } from "./lib/crypto.js";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
@@ -25,6 +26,8 @@ export default function App() {
     localStorage.setItem("leo_user", JSON.stringify(currentUser));
     const socket = getSocket();
     socket.emit("identify", { userId: currentUser.id });
+
+    ensureKeyPair().then((kp) => registerPublicKey(currentUser.id, kp.publicKeyB64));
 
     getUsers().then(setUsers);
     getOnline().then(setOnlineIds);
@@ -53,6 +56,7 @@ export default function App() {
   }
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) || null;
+  const activeRoomUser = activeRoom?.is_dm ? users.find((u) => u.id === activeRoom.otherUserId) : null;
 
   async function handleSelectUser(user) {
     const { roomId } = await openDm(currentUser.id, user.id);
@@ -82,7 +86,7 @@ export default function App() {
         onSelectUser={handleSelectUser}
         onLogout={handleLogout}
       />
-      <ChatWindow currentUser={currentUser} room={activeRoom} />
+      <ChatWindow currentUser={currentUser} room={activeRoom} peerUser={activeRoomUser} />
     </div>
   );
 }

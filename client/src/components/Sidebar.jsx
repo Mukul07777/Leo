@@ -2,6 +2,16 @@ function initials(name) {
   return name.slice(0, 2).toUpperCase();
 }
 
+function lastMsgPreview(lastMsg) {
+  if (!lastMsg) return null;
+  if (lastMsg.deleted) return "message deleted";
+  if (lastMsg.cipher) return "🔒 Encrypted message";
+  if (lastMsg.body) return lastMsg.body;
+  if (lastMsg.voice_duration != null) return "🎙 Voice message";
+  if (lastMsg.file_name) return `📎 ${lastMsg.file_name}`;
+  return null;
+}
+
 function timeAgo(ts) {
   if (!ts) return "";
   const diff = Date.now() - ts;
@@ -52,7 +62,7 @@ export default function Sidebar({ currentUser, rooms, users, onlineIds, activeRo
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white/90 text-sm font-medium truncate">{room.displayName}</p>
-              <p className="text-white/35 text-xs truncate">{room.lastMsg?.body || "No messages yet"}</p>
+              <p className="text-white/35 text-xs truncate">{lastMsgPreview(room.lastMsg) || "No messages yet"}</p>
             </div>
           </button>
         ))}
@@ -85,7 +95,7 @@ export default function Sidebar({ currentUser, rooms, users, onlineIds, activeRo
               <div className="flex-1 min-w-0">
                 <p className="text-white/90 text-sm font-medium truncate">{u.username}</p>
                 <p className="text-white/35 text-xs truncate">
-                  {dmRoom?.lastMsg?.body || (isOnline ? "Online" : `Last seen ${timeAgo(u.last_seen)}`)}
+                  {lastMsgPreview(dmRoom?.lastMsg) || (isOnline ? "Online" : `Last seen ${timeAgo(u.last_seen)}`)}
                 </p>
               </div>
             </button>
